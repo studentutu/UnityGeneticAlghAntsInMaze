@@ -19,7 +19,7 @@ public class MazeSpawner : MonoBehaviour
     public MazeGenerationAlgorithm Algorithm = MazeGenerationAlgorithm.PureRecursive;
     public bool FullRandom = false;
     public int RandomSeed = 12345;
-    public GameObject Floor = null;
+    [SerializeField] private GameObject Floor = null;
     public GameObject Wall = null;
     public GameObject Pillar = null;
     [Tooltip("Generate Maze with Rows*Rows cells")]
@@ -73,50 +73,50 @@ public class MazeSpawner : MonoBehaviour
 
         // BFS
         fromMazeTOInt = null;
-        bool isItTheRightOne = false;
-        switch (Algorithm)
-        {
-            case MazeGenerationAlgorithm.PureRecursive:
-                isItTheRightOne = true;
-                break;
-            case MazeGenerationAlgorithm.RecursiveTree:
-                isItTheRightOne = true;
-                break;
-            case MazeGenerationAlgorithm.RandomTree:
-                isItTheRightOne = true;
-                break;
-            case MazeGenerationAlgorithm.OldestTree:
-                isItTheRightOne = true;
-                break;
-            case MazeGenerationAlgorithm.RecursiveDivision:
-                isItTheRightOne = false;
-                break;
-        }
-        if (isItTheRightOne)
-        {
-            fromMazeTOInt = new int[Rows, Columns];
-            string allInOne = "";
-            endGoalWith = 0;
-            for (int row = 0; row < Rows; row++)
-            {
-                for (int column = 0; column < Columns; column++)
-                {
-                    fromMazeTOInt[row, column] = wholeMaze[row, column].myWeight;
-                    if (endGoalWith <= wholeMaze[row, column].myWeight)
-                    {
-                        endGoalWith = wholeMaze[row, column].myWeight;
-                    }
-                    allInOne += string.Format(" {0,2}", wholeMaze[row, column].myWeight);
-                }
-                allInOne += "\n";
-            }
+        // bool isItTheRightOne = false;
+        // switch (Algorithm)
+        // {
+        //     case MazeGenerationAlgorithm.PureRecursive:
+        //         isItTheRightOne = true;
+        //         break;
+        //     case MazeGenerationAlgorithm.RecursiveTree:
+        //         isItTheRightOne = true;
+        //         break;
+        //     case MazeGenerationAlgorithm.RandomTree:
+        //         isItTheRightOne = true;
+        //         break;
+        //     case MazeGenerationAlgorithm.OldestTree:
+        //         isItTheRightOne = true;
+        //         break;
+        //     case MazeGenerationAlgorithm.RecursiveDivision:
+        //         isItTheRightOne = false;
+        //         break;
+        // }
+        // if (isItTheRightOne)
+        // {
+        //     fromMazeTOInt = new int[Rows, Columns];
+        //     string allInOne = "";
+        //     endGoalWith = 0;
+        //     for (int row = 0; row < Rows; row++)
+        //     {
+        //         for (int column = 0; column < Columns; column++)
+        //         {
+        //             fromMazeTOInt[row, column] = wholeMaze[row, column].myWeight;
+        //             if (endGoalWith <= wholeMaze[row, column].myWeight)
+        //             {
+        //                 endGoalWith = wholeMaze[row, column].myWeight;
+        //             }
+        //             allInOne += string.Format(" {0,2}", wholeMaze[row, column].myWeight);
+        //         }
+        //         allInOne += "\n";
+        //     }
 
-            Debug.Log(allInOne);
-        }
+        //     Debug.Log(allInOne);
+        // }
         isReady = true;
     }
 
-
+    // Event on Button
     public void GenerateMaze()
     {
         buttonGenerate.interactable = false;

@@ -12,7 +12,7 @@ public enum DIRECTIONS
     LEFT,
     BACK
 }
-public class ControlsForIndividuals : MonoBehaviour
+public class ControlsForGenetics : MonoBehaviour
 {
     [Header(" Control Interface")]
 
@@ -103,6 +103,13 @@ public class ControlsForIndividuals : MonoBehaviour
     }
     private IEnumerator GenerateIndividuals()
     {
+        if (allIndividuals.Count > 0)
+        {
+            foreach (var item in allIndividuals)
+            {
+                GameObject.Destroy(item);
+            }
+        }
         for (int i = 0; i < populationSize; i++)
         {
             allIndividuals.Add(Instantiate(playerToControl, Vector3.up, Quaternion.identity));
@@ -119,24 +126,24 @@ public class ControlsForIndividuals : MonoBehaviour
         }
         yield return null;
         isitWithTheRightMaze = false;
-        switch (mazeGen.Algorithm)
-        {
-            case MazeSpawner.MazeGenerationAlgorithm.PureRecursive:
-                isitWithTheRightMaze = true;
-                break;
-            case MazeSpawner.MazeGenerationAlgorithm.RecursiveTree:
-                isitWithTheRightMaze = true;
-                break;
-            case MazeSpawner.MazeGenerationAlgorithm.RandomTree:
-                isitWithTheRightMaze = true;
-                break;
-            case MazeSpawner.MazeGenerationAlgorithm.OldestTree:
-                isitWithTheRightMaze = true;
-                break;
-            case MazeSpawner.MazeGenerationAlgorithm.RecursiveDivision:
-                isitWithTheRightMaze = false;
-                break;
-        }
+        // switch (mazeGen.Algorithm)
+        // {
+        //     case MazeSpawner.MazeGenerationAlgorithm.PureRecursive:
+        //         isitWithTheRightMaze = true;
+        //         break;
+        //     case MazeSpawner.MazeGenerationAlgorithm.RecursiveTree:
+        //         isitWithTheRightMaze = true;
+        //         break;
+        //     case MazeSpawner.MazeGenerationAlgorithm.RandomTree:
+        //         isitWithTheRightMaze = true;
+        //         break;
+        //     case MazeSpawner.MazeGenerationAlgorithm.OldestTree:
+        //         isitWithTheRightMaze = true;
+        //         break;
+        //     case MazeSpawner.MazeGenerationAlgorithm.RecursiveDivision:
+        //         isitWithTheRightMaze = false;
+        //         break;
+        // }
 
         if (isitWithTheRightMaze)
         {

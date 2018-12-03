@@ -15,10 +15,10 @@ public class RecursiveMazeGenerator : BasicMazeGenerator
 
     public override void GenerateMaze()
     {
-        VisitCell(0, 0, Direction.Start,0);
+        VisitCell(0, 0, Direction.Start);
     }
 
-    private void VisitCell(int row, int column, Direction moveMade, int weight)
+    private void VisitCell(int row, int column, Direction moveMade)
     {
         Direction[] movesAvailable = new Direction[4];
         int movesAvailableCount = 0;
@@ -74,7 +74,6 @@ public class RecursiveMazeGenerator : BasicMazeGenerator
             }
            
             GetMazeCell(row, column).IsVisited = true;
-            GetMazeCell(row, column).myWeight = weight;
 
             if (movesAvailableCount > 0)
             {
@@ -83,20 +82,20 @@ public class RecursiveMazeGenerator : BasicMazeGenerator
                     case Direction.Start:
                         break;
                     case Direction.Right:
-                        VisitCell(row, column + 1, Direction.Right,weight +1);
+                        VisitCell(row, column + 1, Direction.Right);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row, column +1) );
                         break;
                     case Direction.Front:
-                        VisitCell(row + 1, column, Direction.Front,weight +1);
+                        VisitCell(row + 1, column, Direction.Front);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row+ 1, column) );
 
                         break;
                     case Direction.Left:
-                        VisitCell(row, column - 1, Direction.Left, weight +1);
+                        VisitCell(row, column - 1, Direction.Left);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row, column -1) );
                         break;
                     case Direction.Back:
-                        VisitCell(row - 1, column, Direction.Back, weight +1);
+                        VisitCell(row - 1, column, Direction.Back);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row -1, column) );
 
                         break;

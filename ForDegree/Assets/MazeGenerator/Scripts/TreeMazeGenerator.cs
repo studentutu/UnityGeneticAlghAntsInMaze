@@ -16,14 +16,12 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
         public int Row;
         public int Column;
         public Direction MoveMade;
-        public int myWeight;
 
-        public CellToVisit(int row, int column, Direction move,int newWeight)
+        public CellToVisit(int row, int column, Direction move)
         {
             Row = row;
             Column = column;
             MoveMade = move;
-            myWeight = newWeight;
         }
 
         public override string ToString()
@@ -43,7 +41,7 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
     {
         Direction[] movesAvailable = new Direction[4];
         int movesAvailableCount = 0;
-        mCellsToVisit.Add(new CellToVisit(Random.Range(0, RowCount), Random.Range(0, ColumnCount), Direction.Start,0));
+        mCellsToVisit.Add(new CellToVisit(Random.Range(0, RowCount), Random.Range(0, ColumnCount), Direction.Start));
 
         while (mCellsToVisit.Count > 0)
         {
@@ -113,7 +111,6 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
             }
 
             GetMazeCell(ctv.Row, ctv.Column).IsVisited = true;
-            GetMazeCell(ctv.Row, ctv.Column).myWeight = ctv.myWeight;
 
 
             if (movesAvailableCount > 0)
@@ -123,16 +120,16 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
                     case Direction.Start:
                         break;
                     case Direction.Right:
-                        mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column + 1, Direction.Right,ctv.myWeight +1));
+                        mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column + 1, Direction.Right));
                         break;
                     case Direction.Front:
-                        mCellsToVisit.Add(new CellToVisit(ctv.Row + 1, ctv.Column, Direction.Front,ctv.myWeight +1));
+                        mCellsToVisit.Add(new CellToVisit(ctv.Row + 1, ctv.Column, Direction.Front));
                         break;
                     case Direction.Left:
-                        mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column - 1, Direction.Left,ctv.myWeight +1));
+                        mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column - 1, Direction.Left));
                         break;
                     case Direction.Back:
-                        mCellsToVisit.Add(new CellToVisit(ctv.Row - 1, ctv.Column, Direction.Back,ctv.myWeight +1));
+                        mCellsToVisit.Add(new CellToVisit(ctv.Row - 1, ctv.Column, Direction.Back));
                         break;
                 }
             }
