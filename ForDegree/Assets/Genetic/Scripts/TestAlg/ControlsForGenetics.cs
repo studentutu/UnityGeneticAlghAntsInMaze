@@ -55,6 +55,7 @@ public class ControlsForGenetics : MonoBehaviour
     [SerializeField] private int StartSizeOfGenes = 5;
     [SerializeField] private int endNumberOfGenerations = 500;
 
+    // UI event
     public void StopCurrentGenetics()
     {
 
@@ -65,32 +66,43 @@ public class ControlsForGenetics : MonoBehaviour
     }
     public void StopButLeaveTheIndividuals()
     {
-        toTemporaralyDeactivate.interactable = false;
+        // toTemporaralyDeactivate.interactable = false;
         initialized = false;
-        if (runningCoroutine != null)
-            StopCoroutine(runningCoroutine);
-        initialized = false;
-        globalAlgor = null;
 
-        toTemporaralyDeactivate.interactable = true;
+        // toTemporaralyDeactivate.interactable = true;
     }
     private IEnumerator stopandClean()
     {
-        if (runningCoroutine != null)
-            StopCoroutine(runningCoroutine);
+
         initialized = false;
         if (allIndividuals != null)
+        {
+            foreach (var item in allIndividuals)
+            {
+                item.velocity = Vector3.zero;
+            }
+            // if(runningCoroutine != null)
+            //     StopCoroutine(runningCoroutine);
+            yield return new WaitForSeconds(0.25f);
+            
+            while (runningCoroutine != null)
+            {
+                yield return null;
+            }
             allIndividuals.Clear();
+        }
 
         while (parentToAllIndiv.childCount > 0)
         {
-            Destroy(parentToAllIndiv.GetChild(0));
+            Destroy(parentToAllIndiv.GetChild(0).gameObject);
+            yield return null;
         }
-        yield return null;
         globalAlgor = null;
 
         toTemporaralyDeactivate.interactable = true;
     }
+
+    // UI event
     public void Initialize()
     {
         if (!currentMazeSpawner.isReady)
@@ -98,13 +110,13 @@ public class ControlsForGenetics : MonoBehaviour
             return;
         }
         if (runningCoroutine != null)
-            StopCoroutine(runningCoroutine);
+            return;
         if (allIndividuals != null)
             allIndividuals.Clear();
 
         while (parentToAllIndiv.childCount > 0)
         {
-            Destroy(parentToAllIndiv.GetChild(0));
+            Destroy(parentToAllIndiv.GetChild(0).gameObject);
         }
 
         int dnaSize = currentMazeSpawner.Rows;
@@ -129,7 +141,8 @@ public class ControlsForGenetics : MonoBehaviour
                                     UseStagnation);
 
         maxWeight = currentMazeSpawner.Rows * currentMazeSpawner.Rows * currentMazeSpawner.diff;
-        Debug.Log(" Max Weight = " + maxWeight);
+        // Debug.Log(" Max Weight = " + maxWeight);
+
         // Set population and Target!
         StartCoroutine(GenerateIndividuals());
     }
@@ -152,24 +165,6 @@ public class ControlsForGenetics : MonoBehaviour
         isitWithTheRightMaze = true;
         ActivatedStagnation = false;
         counter = 0;
-        // switch (mazeGen.Algorithm)
-        // {
-        //     case MazeSpawner.MazeGenerationAlgorithm.PureRecursive:
-        //         isitWithTheRightMaze = true;
-        //         break;
-        //     case MazeSpawner.MazeGenerationAlgorithm.RecursiveTree:
-        //         isitWithTheRightMaze = true;
-        //         break;
-        //     case MazeSpawner.MazeGenerationAlgorithm.RandomTree:
-        //         isitWithTheRightMaze = true;
-        //         break;
-        //     case MazeSpawner.MazeGenerationAlgorithm.OldestTree:
-        //         isitWithTheRightMaze = true;
-        //         break;
-        //     case MazeSpawner.MazeGenerationAlgorithm.RecursiveDivision:
-        //         isitWithTheRightMaze = false;
-        //         break;
-        // }
 
         if (isitWithTheRightMaze)
         {
@@ -197,19 +192,19 @@ public class ControlsForGenetics : MonoBehaviour
         yield return null;
 
         initialized = true;
-        StartCoroutine(StartUpdating());
+        runningCoroutine = StartCoroutine(StartUpdating());
     }
 
     // Update is called once per frame
     private IEnumerator StartUpdating()
     {
-        if (!initialized)
-        {
-            yield break;
-        }
         while (globalAlgor.BestFittnes != 1 || globalAlgor.Generation >= endNumberOfGenerations)
         {
-
+            if (!initialized)
+            {
+                runningCoroutine = null;
+                yield break;
+            }
             for (int j = 0; j < globalAlgor.Population.Count; j++)
             {
                 allIndividuals[j].velocity = Vector3.zero;
@@ -220,12 +215,17 @@ public class ControlsForGenetics : MonoBehaviour
             // when the wait function is over, start new Generation
             numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes;
 
-            runningCoroutine = StartCoroutine(waiterSecs());
-            yield return runningCoroutine;
+            yield return StartCoroutine(waiterSecs());
+            if (!initialized)
+            {
+                runningCoroutine = null;
+                yield break;
+            }
             if (globalAlgor.BestFittnes == 1)
             {
                 numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes + " End!";
                 initialized = false;
+                runningCoroutine = null;
                 StopButLeaveTheIndividuals();
                 yield break;
             }
@@ -240,13 +240,32 @@ public class ControlsForGenetics : MonoBehaviour
         // Waiter for Population action to be over
         for (int i = 0; i < globalAlgor.dnaSize; i++)
         {
-            yield return null;
+            if (!initialized)
+            {
+                runningCoroutine = null;
+                yield break;
+            }
             for (int j = 0; j < globalAlgor.Population.Count; j++)
             {
                 UpdatePositionsForIndividuals(globalAlgor.Population[j].Genes[i], j);
             }
-            yield return new WaitForSeconds(waSecondsFor);
+            float timeUp = waSecondsFor;
+            while (timeUp > 0)
+            {
+                if (!initialized)
+                {
+                    runningCoroutine = null;
+                    yield break;
+                }
+                timeUp -= Time.deltaTime;
+                yield return null;
+            }
 
+        }
+        if (!initialized)
+        {
+            runningCoroutine = null;
+            yield break;
         }
         globalAlgor.NewGeneration(); // Recalculated fittness 
 
@@ -267,7 +286,6 @@ public class ControlsForGenetics : MonoBehaviour
                 }
             }
         }
-        initialized = true;
     }
 
     // Interface of Player Control from Individual

@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MazeGenerator/demo.unity
-    guid: 5f66713930f36f84a865122d99889d76
+    path: Assets/Genetic/DemoMazeGenetic.unity
+    guid: 5613b1c200d77e740a35a09a86c37edf
   m_configObjects: {}

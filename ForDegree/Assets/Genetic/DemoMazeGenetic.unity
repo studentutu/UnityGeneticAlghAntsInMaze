@@ -2126,7 +2126,7 @@ MonoBehaviour:
   currentMazeSpawner: {fileID: 949568340}
   graphToCalculate: {fileID: 59490394}
   parentToAllIndiv: {fileID: 1292546818}
-  UseStagnation: 1
+  UseStagnation: 0
   StartSizeOfGenes: 5
   endNumberOfGenerations: 500
 --- !u!4 &1292546818
