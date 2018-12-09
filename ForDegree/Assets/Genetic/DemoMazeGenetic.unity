@@ -2118,7 +2118,7 @@ MonoBehaviour:
   ForceMagnitude: 25
   populationSize: 200
   mutationRate: 0.01
-  TopNBestElementsKeep: 0
+  TopNBestElementsKeep: 5
   target: {fileID: 0}
   numGenerationsText: {fileID: 1988816026}
   waSecondsFor: 0.15
@@ -2126,6 +2126,9 @@ MonoBehaviour:
   currentMazeSpawner: {fileID: 949568340}
   graphToCalculate: {fileID: 59490394}
   parentToAllIndiv: {fileID: 1292546818}
+  UseStagnation: 1
+  StartSizeOfGenes: 5
+  endNumberOfGenerations: 500
 --- !u!4 &1292546818
 Transform:
   m_ObjectHideFlags: 0

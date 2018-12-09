@@ -4,13 +4,12 @@ namespace GeneticImplementation
 {
     public class GeneticAlghorithm<T>
     {
-
+        #region  Base GEnetics
         public List<DNA<T>> Population { get; private set; }
         public int Generation { get; private set; }
         public float BestFittnes { get; private set; }
         public T[] BestGenes { get; private set; }
 
-        private int ElementsToKeep;
         private float MutationRate;
         private Random random;
         private float fittnesSum;
@@ -23,9 +22,26 @@ namespace GeneticImplementation
         private Func<T> getRandomGene;
         private Func<int, float> fittnesFunc;
 
-        // 3.Part -  Procreation of population/ Random Addition of genes, when in stagnation
+        #endregion
+
+        #region Second Type
+        // 2. Part - Best individuals persist
+        private int ElementsToKeep;
+        #endregion
+
+        #region  Third Type
+        // 3.Part -  Stagnation of population/ Random Addition of genes, when in stagnation
         private float[] stagnationStats; // for derivative minimum is 2 points!
-        private float[] optmizationForStagnation;
+        private float[] FirstDerivativeStagnation;
+        private float[] secondDeriv;
+
+        private int watchForLast = 5;
+        public int MinimumForWatching{
+            get{
+                return watchForLast;
+            }
+        }
+        #endregion
 
         public GeneticAlghorithm() { }
         /// <summary>
@@ -40,7 +56,8 @@ namespace GeneticImplementation
             Func<int, float> fittnesFunc,
             int keepFirstNBEst,
             float mutationRate = 0.01f,
-            int numberOfgenerationsBeforeStagnation = 0)
+            bool useStagnation = false,
+            int stepsToWatch = 5)
         {
             Generation = 1;
             MutationRate = mutationRate;
@@ -49,31 +66,31 @@ namespace GeneticImplementation
             newPopulation = new List<DNA<T>>(populationSize); // optimization
 
             this.random = random;
-            this.ElementsToKeep = keepFirstNBEst;
             this.dnaSize = dnaSize;
             this.fittnesFunc = fittnesFunc;
             this.getRandomGene = getRandomGene;
 
             BestGenes = new T[dnaSize];
-            
+
             for (int i = 0; i < populationSize; i++)
             {
                 Population.Add(new DNA<T>(dnaSize, random, getRandomGene, fittnesFunc, true));
             }
+            // 2. Type
+            this.ElementsToKeep = keepFirstNBEst;
 
-
-            stagnationStats = new float[numberOfgenerationsBeforeStagnation];
-            optmizationForStagnation = new float[numberOfgenerationsBeforeStagnation];
-            for (int i = 0; i < numberOfgenerationsBeforeStagnation; i++)
+            // 3. Type
+            if (useStagnation)
             {
-                stagnationStats[i] = 0;
-                optmizationForStagnation[i] = 0;
+                watchForLast = stepsToWatch;
+                stagnationStats = new float[watchForLast];
+                FirstDerivativeStagnation = new float[watchForLast];
+                secondDeriv = new float[watchForLast];
             }
         }
 
         /// <summary>
-        /// Construct new Generic Genetic Alghorithm with custom Fitness
-        /// and generate random Gene functions
+        /// Construct new Generation
         /// </summary>
         public void NewGeneration(int NewElems = 0, bool crosOverNewElem = false, bool isItDelayed = false)
         {
@@ -169,6 +186,8 @@ namespace GeneticImplementation
             return null;
         }
 
+        
+        #region  Serialization
         public void SaveGeneration()
         {
             var saveTo = new GeneticSaveData<T>();
@@ -185,8 +204,11 @@ namespace GeneticImplementation
         {
 
         }
-
-        // Figure out if the slope is at the peak, then maximum
+        #endregion
+        
+        #region  Additional Genes and Stagnation Check
+        // Figure out if the slope is at the peak, then maximum, when true do nothing
+        // when false - add new gene, wait for a full round
         public bool IsStagnationAtPeak()
         {
             var result = false;
@@ -195,32 +217,89 @@ namespace GeneticImplementation
                 return result;
             }
 
-            // Check if stagnation is at peak
+            // Check if stagnation is at peak on last few rounds
             // 1. Calculate first derivative
             for (int i = 1; i < stagnationStats.Length; i++)
             {
-                optmizationForStagnation[i-1] =  stagnationStats[i] - stagnationStats[i-1]; // delta y/time (1);
+                FirstDerivativeStagnation[i] = stagnationStats[i] - stagnationStats[i - 1]; // delta y/time (1);
             }
 
+            // 2. Calculate second derivative
+            for (int i = 1; i < FirstDerivativeStagnation.Length; i++)
+            {
+                secondDeriv[i] = FirstDerivativeStagnation[i] - FirstDerivativeStagnation[i - 1]; // delta y/time (1);
+            }
+
+            // Decide if Population was at peak on last few
+            result = false;
+            for (int i = 1; i < FirstDerivativeStagnation.Length; i++)
+            {
+                if (FirstDerivativeStagnation[i] == 0 && secondDeriv[i] < 0)
+                {
+                    // peak
+                    result = true;
+                }
+            }
 
             return result;
         }
 
         // Always rotate with each generation
-        public void rotateStagnationStats()
+        private void rotateStagnationStats()
         {
             for (int i = 1; i < stagnationStats.Length; i++)
             {
                 stagnationStats[i - 1] = stagnationStats[i];
+                FirstDerivativeStagnation[i - 1] = FirstDerivativeStagnation[i];
+                secondDeriv[i - 1] = secondDeriv[i];
             }
+
         }
+
         // Update value with each generation
-        public void AddStat(float bestFitness)
+        public void AddToStatgantion(float bestFitness)
         {
-            if (stagnationStats.Length > 1)
+            rotateStagnationStats();
+            stagnationStats[stagnationStats.Length - 1] = bestFitness;
+        }
+
+
+        public void addNewGenes(int newGenes = 2)
+        {
+
+            dnaSize = dnaSize + newGenes;
+            var copyGenes = new T[dnaSize];
+            for (int i = 0; i < BestGenes.Length; i++)
             {
-                stagnationStats[stagnationStats.Length - 1] = bestFitness;
+                copyGenes[i] = BestGenes[i];
+            }
+            for (int i = BestGenes.Length; i < dnaSize; i++)
+            {
+                copyGenes[i] = getRandomGene();
+            }
+
+            BestGenes = copyGenes;
+            newPopulation.Clear();
+
+            // List<DNA<T>> copySamePop = new List<DNA<T>>();
+            foreach (var individual in Population)
+            {
+                var currentGenes =  individual.Genes;
+                var copyNew = new T[dnaSize];
+                for (int i = 0; i < currentGenes.Length; i++)
+                {
+                    copyNew[i] = currentGenes[i];
+                }
+
+                for (int i = currentGenes.Length; i < dnaSize; i++)
+                {
+                    copyNew[i] = getRandomGene();
+                }
+
+                // set them back!
+                individual.Genes = copyNew;
             }
         }
+        #endregion
     }
 }

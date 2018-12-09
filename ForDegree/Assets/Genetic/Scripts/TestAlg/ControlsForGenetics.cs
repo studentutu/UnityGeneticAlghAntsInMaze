@@ -51,6 +51,10 @@ public class ControlsForGenetics : MonoBehaviour
     [SerializeField] private Graph graphToCalculate;
     [SerializeField] private Transform parentToAllIndiv;
 
+    [SerializeField] private bool UseStagnation = false;
+    [SerializeField] private int StartSizeOfGenes = 5;
+    [SerializeField] private int endNumberOfGenerations = 500;
+
     public void StopCurrentGenetics()
     {
 
@@ -102,13 +106,29 @@ public class ControlsForGenetics : MonoBehaviour
         {
             Destroy(parentToAllIndiv.GetChild(0));
         }
+
         int dnaSize = currentMazeSpawner.Rows;
-        dnaSize *= dnaSize;
+        if (UseStagnation)
+        {
+            dnaSize = StartSizeOfGenes;
+        }
+        else
+        {
+            dnaSize = currentMazeSpawner.Rows * currentMazeSpawner.Rows;
+        }
         random = new System.Random();
         allIndividuals = new List<Rigidbody>(populationSize);
-        globalAlgor = new GeneticAlghorithm<byte>(populationSize, dnaSize, random, GetRandomDirection, FittnessFunction, TopNBestElementsKeep, mutationRate);
+        globalAlgor = new GeneticAlghorithm<byte>(
+                                    populationSize,
+                                    dnaSize,
+                                    random,
+                                    GetRandomDirection,
+                                    FittnessFunction,
+                                    TopNBestElementsKeep,
+                                    mutationRate,
+                                    UseStagnation);
 
-        maxWeight = dnaSize * currentMazeSpawner.diff;
+        maxWeight = currentMazeSpawner.Rows * currentMazeSpawner.Rows * currentMazeSpawner.diff;
         Debug.Log(" Max Weight = " + maxWeight);
         // Set population and Target!
         StartCoroutine(GenerateIndividuals());
@@ -130,6 +150,8 @@ public class ControlsForGenetics : MonoBehaviour
         }
         yield return null;
         isitWithTheRightMaze = true;
+        ActivatedStagnation = false;
+        counter = 0;
         // switch (mazeGen.Algorithm)
         // {
         //     case MazeSpawner.MazeGenerationAlgorithm.PureRecursive:
@@ -185,7 +207,7 @@ public class ControlsForGenetics : MonoBehaviour
         {
             yield break;
         }
-        while (globalAlgor.BestFittnes != 1)
+        while (globalAlgor.BestFittnes != 1 || globalAlgor.Generation >= endNumberOfGenerations)
         {
 
             for (int j = 0; j < globalAlgor.Population.Count; j++)
@@ -198,7 +220,6 @@ public class ControlsForGenetics : MonoBehaviour
             // when the wait function is over, start new Generation
             numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes;
 
-            initialized = false;
             runningCoroutine = StartCoroutine(waiterSecs());
             yield return runningCoroutine;
             if (globalAlgor.BestFittnes == 1)
@@ -212,7 +233,8 @@ public class ControlsForGenetics : MonoBehaviour
         }
 
     }
-
+    private int counter = 0;
+    private bool ActivatedStagnation = false;
     private IEnumerator waiterSecs()
     {
         // Waiter for Population action to be over
@@ -226,7 +248,25 @@ public class ControlsForGenetics : MonoBehaviour
             yield return new WaitForSeconds(waSecondsFor);
 
         }
-        globalAlgor.NewGeneration(); // Recalculated fittness ob end position
+        globalAlgor.NewGeneration(); // Recalculated fittness 
+
+        if (UseStagnation)
+        {
+            counter++;
+            globalAlgor.AddToStatgantion(globalAlgor.BestFittnes);
+            if (counter > globalAlgor.MinimumForWatching)
+            {
+                ActivatedStagnation = true;
+            }
+            if (ActivatedStagnation && counter % (globalAlgor.MinimumForWatching + 1) == 0)
+            {
+                counter = 1;
+                if (!globalAlgor.IsStagnationAtPeak())
+                {
+                    globalAlgor.addNewGenes();
+                }
+            }
+        }
         initialized = true;
     }
 

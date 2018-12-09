@@ -46,21 +46,21 @@ public class TestText : MonoBehaviour
         ga = new GeneticAlghorithm<char>(populationSize, targetString.Length, random, GetRandomCharacter, FitnessFunction, TopNBestElementsKeep, mutationRate);
 
     }
-    [Header("How Much To Store")]
-    [SerializeField] private int storeEvery = 20;
+    // [Header("How Much To Store")]
+    // [SerializeField] private int storeEvery = 20;
 
 
     void Update()
     {
 
         ga.NewGeneration();
-        if (ga.Generation % storeEvery == 0)
-        {
-            GeneticSaveData<char> newSave = new GeneticSaveData<char>();
-            newSave.TakeFrom(ga);
-            bool b = newSave.saveTo("save" + ga.Generation);
-            Debug.Log( b? CharArrayToString(ga.Population[0].Genes) : "not saved");
-        }
+        // if (ga.Generation % storeEvery == 0)
+        // {
+        //     GeneticSaveData<char> newSave = new GeneticSaveData<char>();
+        //     newSave.TakeFrom(ga);
+        //     bool b = newSave.saveTo("save" + ga.Generation);
+        //     Debug.Log( b? CharArrayToString(ga.Population[0].Genes) : "not saved");
+        // }
 
         UpdateText(ga.BestGenes, ga.BestFittnes, ga.Generation, ga.Population.Count, (j) => ga.Population[j].Genes);
 

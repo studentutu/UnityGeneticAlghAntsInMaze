@@ -5,7 +5,7 @@ namespace GeneticImplementation
 {
     public class DNA<T>
     {
-        public T[] Genes { get; private set; }
+        public T[] Genes { get; set; }
         public float Fittnes { get; private set; }
         public Random random;
         private Func<T> getRandomGene;
