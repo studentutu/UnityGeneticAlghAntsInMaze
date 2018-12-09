@@ -849,6 +849,11 @@ Prefab:
       propertyPath: m_connectin.Array.data[1]
       value: 
       objectReference: {fileID: 441456152}
+    - target: {fileID: 1136463822123074, guid: b2545609c1247ad41901a37ae5bd2802, type: 2}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000,
+        type: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b2545609c1247ad41901a37ae5bd2802, type: 2}
   m_IsPrefabAsset: 0

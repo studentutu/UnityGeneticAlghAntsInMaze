@@ -6,6 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Genetic/DemoMazeGenetic.unity
+    path: Assets/Genetic/MainMenu.unity
+    guid: b64d43a53d476b141bdb3911257e2f53
+  - enabled: 1
+    path: Assets/Genetic/Monkeys.unity
+    guid: 5f66713930f36f84a865122d99889d76
+  - enabled: 1
+    path: Assets/Genetic/FirstType.unity
     guid: 5613b1c200d77e740a35a09a86c37edf
+  - enabled: 1
+    path: Assets/Genetic/SecondTYpe.unity
+    guid: 3df348c94b8438249a5820888609deb4
+  - enabled: 1
+    path: Assets/Genetic/ThirdType.unity
+    guid: 0742bacac95240a489ac64664f3852a9
   m_configObjects: {}
