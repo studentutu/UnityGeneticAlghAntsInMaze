@@ -57,6 +57,7 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
             else if (!GetMazeCell(ctv.Row, ctv.Column).IsVisited && ctv.MoveMade != Direction.Left)
             {
                 GetMazeCell(ctv.Row, ctv.Column).WallRight = true;
+
                 if (ctv.Column + 1 < ColumnCount)
                 {
                     GetMazeCell(ctv.Row, ctv.Column + 1).WallLeft = true;
@@ -120,15 +121,27 @@ public abstract class TreeMazeGenerator : BasicMazeGenerator
                     case Direction.Start:
                         break;
                     case Direction.Right:
+                        GetMazeCell(ctv.Row, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column +1));
+                        GetMazeCell(ctv.Row, ctv.Column +1).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column));
+
                         mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column + 1, Direction.Right));
                         break;
                     case Direction.Front:
+                        GetMazeCell(ctv.Row, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row +1, ctv.Column));
+                        GetMazeCell(ctv.Row + 1, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column));
+
                         mCellsToVisit.Add(new CellToVisit(ctv.Row + 1, ctv.Column, Direction.Front));
                         break;
                     case Direction.Left:
+                        GetMazeCell(ctv.Row, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column - 1));
+                        GetMazeCell(ctv.Row, ctv.Column - 1).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column));
+
                         mCellsToVisit.Add(new CellToVisit(ctv.Row, ctv.Column - 1, Direction.Left));
                         break;
                     case Direction.Back:
+                        GetMazeCell(ctv.Row, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row-1, ctv.Column));
+                        GetMazeCell(ctv.Row -1, ctv.Column).neighbor.Add( GetMazeCell(ctv.Row, ctv.Column));
+
                         mCellsToVisit.Add(new CellToVisit(ctv.Row - 1, ctv.Column, Direction.Back));
                         break;
                 }

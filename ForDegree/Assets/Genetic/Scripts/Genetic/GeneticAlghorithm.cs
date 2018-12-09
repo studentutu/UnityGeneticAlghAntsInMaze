@@ -55,16 +55,19 @@ namespace GeneticImplementation
             this.getRandomGene = getRandomGene;
 
             BestGenes = new T[dnaSize];
+            
+            for (int i = 0; i < populationSize; i++)
+            {
+                Population.Add(new DNA<T>(dnaSize, random, getRandomGene, fittnesFunc, true));
+            }
+
+
             stagnationStats = new float[numberOfgenerationsBeforeStagnation];
             optmizationForStagnation = new float[numberOfgenerationsBeforeStagnation];
             for (int i = 0; i < numberOfgenerationsBeforeStagnation; i++)
             {
                 stagnationStats[i] = 0;
                 optmizationForStagnation[i] = 0;
-            }
-            for (int i = 0; i < populationSize; i++)
-            {
-                Population.Add(new DNA<T>(dnaSize, random, getRandomGene, fittnesFunc, true));
             }
         }
 
@@ -98,7 +101,7 @@ namespace GeneticImplementation
                 }
                 else if (i < Population.Count || crosOverNewElem)
                 {
-                    // Critical momoment!
+                    // Critical moment!
                     DNA<T> parent1 = ChooseParent();
                     DNA<T> parent2 = ChooseParent();
 

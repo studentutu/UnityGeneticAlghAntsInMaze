@@ -41,8 +41,10 @@ public class MazeSpawner : MonoBehaviour
     [HideInInspector]
     public MazeCell[,] wholeMaze;
     [HideInInspector]
-    public int[,] fromMazeTOInt;
-    public int endGoalWith = 0;
+    public NodeMono endGoal;
+    public float diff = 0 ;
+    [SerializeField] private Graph usedGraph;
+   
     private IEnumerator waitAbit(UnityEngine.UI.Button button)
     {
         yield return null;
@@ -70,49 +72,14 @@ public class MazeSpawner : MonoBehaviour
         allTargets.Clear();
         allTargets.Add(target);
 
+        var newOne = target.transform.position;
+        int row = (int) (newOne.z / ZfloatDistanceCellHeight); // heaight
+        int colums = (int) (newOne.x / XfloatDistanceCellWidth); // widht
 
-        // BFS
-        fromMazeTOInt = null;
-        // bool isItTheRightOne = false;
-        // switch (Algorithm)
-        // {
-        //     case MazeGenerationAlgorithm.PureRecursive:
-        //         isItTheRightOne = true;
-        //         break;
-        //     case MazeGenerationAlgorithm.RecursiveTree:
-        //         isItTheRightOne = true;
-        //         break;
-        //     case MazeGenerationAlgorithm.RandomTree:
-        //         isItTheRightOne = true;
-        //         break;
-        //     case MazeGenerationAlgorithm.OldestTree:
-        //         isItTheRightOne = true;
-        //         break;
-        //     case MazeGenerationAlgorithm.RecursiveDivision:
-        //         isItTheRightOne = false;
-        //         break;
-        // }
-        // if (isItTheRightOne)
-        // {
-        //     fromMazeTOInt = new int[Rows, Columns];
-        //     string allInOne = "";
-        //     endGoalWith = 0;
-        //     for (int row = 0; row < Rows; row++)
-        //     {
-        //         for (int column = 0; column < Columns; column++)
-        //         {
-        //             fromMazeTOInt[row, column] = wholeMaze[row, column].myWeight;
-        //             if (endGoalWith <= wholeMaze[row, column].myWeight)
-        //             {
-        //                 endGoalWith = wholeMaze[row, column].myWeight;
-        //             }
-        //             allInOne += string.Format(" {0,2}", wholeMaze[row, column].myWeight);
-        //         }
-        //         allInOne += "\n";
-        //     }
+        var mazeCell = wholeMaze[row,colums];
 
-        //     Debug.Log(allInOne);
-        // }
+
+        endGoal = mazeCell.myMonoCell; 
         isReady = true;
     }
 
@@ -148,25 +115,25 @@ public class MazeSpawner : MonoBehaviour
                 break;
             case MazeGenerationAlgorithm.RecursiveDivision:
                 mMazeGenerator = new DivisionMazeGenerator(Rows, Columns);
+
+                Debug.Log("<Color=Red> This alghorithm is not supported for Dijkstra or Genetic ! </Color>");
                 break;
         }
         mMazeGenerator.GenerateMaze();
         wholeMaze = mMazeGenerator.GetWholeMaze();
 
-        ContainerFloor notCached;
-
+        XfloatDistanceCellWidth = (CellWidth + (AddGaps ? .2f : 0));
+        ZfloatDistanceCellHeight = (CellHeight + (AddGaps ? .2f : 0));
         for (int row = 0; row < Rows; row++)
         {
             for (int column = 0; column < Columns; column++)
             {
-                float x = column * (CellWidth + (AddGaps ? .2f : 0)); // gaps between the walls and floor
-                float z = row * (CellHeight + (AddGaps ? .2f : 0));
+                float x = column * XfloatDistanceCellWidth; // gaps between the walls and floor
+                float z = row * ZfloatDistanceCellHeight;
                 MazeCell cell = mMazeGenerator.GetMazeCell(row, column);
                 GameObject tmp;
                 tmp = Instantiate(Floor, new Vector3(x, 0, z), Quaternion.Euler(0, 0, 0)) as GameObject;
-                notCached = tmp.GetComponent<ContainerFloor>();
-                notCached.row = row;
-                notCached.column = column;
+                cell.myMonoCell = tmp.GetComponent<NodeMono>();
                 tmp.transform.parent = transform;
                 if (cell.WallRight)
                 {
@@ -199,6 +166,36 @@ public class MazeSpawner : MonoBehaviour
                 }
             }
         }
+        float differenceBetween = Vector3.Distance( mMazeGenerator.GetMazeCell(0, 0).myMonoCell.transform.position, 
+                                                    mMazeGenerator.GetMazeCell(0, 1).myMonoCell.transform.position );
+        diff = differenceBetween;
+        usedGraph.nodes.Clear();
+
+        for (int row = 0; row < Rows; row++)
+        {
+            for (int column = 0; column < Columns; column++)
+            {
+                MazeCell cell = mMazeGenerator.GetMazeCell(row, column);
+                usedGraph.nodes.Add(cell.myMonoCell.MyNode);
+
+                foreach (var item in cell.neighbor)
+                {
+                    cell.myMonoCell.connections.Add(item.myMonoCell);
+                }
+            }
+        }
+
+        for (int row = 0; row < Rows; row++)
+        {
+            for (int column = 0; column < Columns; column++)
+            {
+                MazeCell cell = mMazeGenerator.GetMazeCell(row, column);
+                cell.myMonoCell.UpdateList();
+            }
+        }
+
+
+
         if (Pillar != null)
         {
             for (int row = 0; row < Rows + 1; row++)
@@ -217,9 +214,18 @@ public class MazeSpawner : MonoBehaviour
         long elapsedMs = timer.ElapsedMilliseconds;
         Debug.Log(" All New! " + elapsedMs + "ms (1/1000 sec)");  // 4 ms
 
+        switch (Algorithm)
+        {
+            case MazeGenerationAlgorithm.RecursiveDivision:
+                return;
+                // break;
+        }
         StartCoroutine(waitAbit(buttonGenerate));
     }
+    public float XfloatDistanceCellWidth = 0;
+    public float ZfloatDistanceCellHeight = 0;
 
+    
     private void DestroyAllChildren()
     {
         if (gameObject.transform.childCount > 0)

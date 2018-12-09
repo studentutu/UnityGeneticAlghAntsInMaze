@@ -44,10 +44,12 @@ public class ControlsForGenetics : MonoBehaviour
 
     [SerializeField] private Button toTemporaralyDeactivate;
     private bool isitWithTheRightMaze = false;
-    private int[,] allWeights = null;
-    private int maxWeight = 0;
+    private float maxWeight = 0;
     #endregion
+    [SerializeField] private MazeSpawner currentMazeSpawner = null;
 
+    [SerializeField] private Graph graphToCalculate;
+    [SerializeField] private Transform parentToAllIndiv;
 
     public void StopCurrentGenetics()
     {
@@ -74,11 +76,11 @@ public class ControlsForGenetics : MonoBehaviour
             StopCoroutine(runningCoroutine);
         initialized = false;
         if (allIndividuals != null)
+            allIndividuals.Clear();
+
+        while (parentToAllIndiv.childCount > 0)
         {
-            for (int j = 0; j < allIndividuals.Count; j++)
-            {
-                Destroy(allIndividuals[j].gameObject);
-            }
+            Destroy(parentToAllIndiv.GetChild(0));
         }
         yield return null;
         globalAlgor = null;
@@ -87,45 +89,47 @@ public class ControlsForGenetics : MonoBehaviour
     }
     public void Initialize()
     {
-        var maze = FindObjectOfType<MazeSpawner>();
-        if (!maze.isReady)
+        if (!currentMazeSpawner.isReady)
         {
             return;
         }
-        int dnaSize = maze.Rows;
+        if (runningCoroutine != null)
+            StopCoroutine(runningCoroutine);
+        if (allIndividuals != null)
+            allIndividuals.Clear();
+
+        while (parentToAllIndiv.childCount > 0)
+        {
+            Destroy(parentToAllIndiv.GetChild(0));
+        }
+        int dnaSize = currentMazeSpawner.Rows;
         dnaSize *= dnaSize;
         random = new System.Random();
         allIndividuals = new List<Rigidbody>(populationSize);
         globalAlgor = new GeneticAlghorithm<byte>(populationSize, dnaSize, random, GetRandomDirection, FittnessFunction, TopNBestElementsKeep, mutationRate);
 
+        maxWeight = dnaSize * currentMazeSpawner.diff;
+        Debug.Log(" Max Weight = " + maxWeight);
         // Set population and Target!
         StartCoroutine(GenerateIndividuals());
     }
     private IEnumerator GenerateIndividuals()
     {
-        if (allIndividuals.Count > 0)
-        {
-            foreach (var item in allIndividuals)
-            {
-                GameObject.Destroy(item);
-            }
-        }
+
         for (int i = 0; i < populationSize; i++)
         {
-            allIndividuals.Add(Instantiate(playerToControl, Vector3.up, Quaternion.identity));
-            if (i % 20 == 1)
+            var someone = Instantiate(playerToControl, parentToAllIndiv);
+            someone.transform.position = Vector3.up;
+            someone.transform.rotation = Quaternion.identity;
+
+            allIndividuals.Add(someone);
+            if (i % 20 == 19)
             {
                 yield return null;
             }
         }
-
-        var mazeGen = FindObjectOfType<MazeSpawner>();
-        while (!mazeGen.isReady)
-        {
-            yield return null;
-        }
         yield return null;
-        isitWithTheRightMaze = false;
+        isitWithTheRightMaze = true;
         // switch (mazeGen.Algorithm)
         // {
         //     case MazeSpawner.MazeGenerationAlgorithm.PureRecursive:
@@ -147,66 +151,66 @@ public class ControlsForGenetics : MonoBehaviour
 
         if (isitWithTheRightMaze)
         {
-            int row = mazeGen.fromMazeTOInt.GetLength(0);
-            int colms = mazeGen.fromMazeTOInt.GetLength(1);
+            MostDistant = 0;
+        }
+        else
+        {
 
+            List<GameObject> allTargets = currentMazeSpawner.allTargets;
+            float dist = 0;
+            float tempDist = 0;
 
-            allWeights = new int[row, colms];
-            for (int i = 0; i < row; i++)
+            for (int i = 0; i < allTargets.Count; i++)
             {
-                for (int j = 0; j < colms; j++)
+                tempDist = Vector3.Distance(Vector3.zero, allTargets[i].transform.position);
+                if (dist <= tempDist)
                 {
-                    allWeights[i, j] = mazeGen.fromMazeTOInt[i, j];
+                    dist = tempDist;
+                    target = allTargets[i].transform;
                 }
             }
-            maxWeight = mazeGen.endGoalWith;
-        }
-        List<GameObject> allTargets = mazeGen.allTargets;
-        float dist = 0;
-        float tempDist = 0;
-
-        for (int i = 0; i < allTargets.Count; i++)
-        {
-            tempDist = Vector3.Distance(Vector3.zero, allTargets[i].transform.position);
-            if (dist <= tempDist)
-            {
-                dist = tempDist;
-                target = allTargets[i].transform;
-            }
+            MostDistant = dist;
         }
 
         yield return null;
 
-        MostDistant = dist;
         initialized = true;
+        StartCoroutine(StartUpdating());
     }
 
     // Update is called once per frame
-    private void Update()
+    private IEnumerator StartUpdating()
     {
-        while (!initialized)
+        if (!initialized)
         {
-            return;
+            yield break;
         }
-        for (int j = 0; j < globalAlgor.Population.Count; j++)
+        while (globalAlgor.BestFittnes != 1)
         {
-            allIndividuals[j].velocity = Vector3.zero;
-            allIndividuals[j].angularVelocity = Vector3.zero;
-            allIndividuals[j].transform.position = Vector3.up;
-        }
-        globalAlgor.NewGeneration(0, false, true); // first is delayed
 
-        initialized = false;
-        runningCoroutine = StartCoroutine(waiterSecs());
-        // when the wait function is over, start new Generation
-        numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes;
+            for (int j = 0; j < globalAlgor.Population.Count; j++)
+            {
+                allIndividuals[j].velocity = Vector3.zero;
+                allIndividuals[j].angularVelocity = Vector3.zero;
+                allIndividuals[j].transform.position = Vector3.up;
+            }
+            // globalAlgor.NewGeneration(0, false, true); // first is delayed
+            // when the wait function is over, start new Generation
+            numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes;
 
-        if (globalAlgor.BestFittnes == 1)
-        {
-            numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes + " End!";
             initialized = false;
-            StopButLeaveTheIndividuals();
+            runningCoroutine = StartCoroutine(waiterSecs());
+            yield return runningCoroutine;
+            if (globalAlgor.BestFittnes == 1)
+            {
+                numGenerationsText.text = "GENERATION: " + globalAlgor.Generation + " BEST FIT : " + globalAlgor.BestFittnes + " End!";
+                initialized = false;
+                StopButLeaveTheIndividuals();
+                yield break;
+            }
+
         }
+
     }
 
     private IEnumerator waiterSecs()
@@ -266,13 +270,19 @@ public class ControlsForGenetics : MonoBehaviour
 
         if (isitWithTheRightMaze)
         {
-            var newOne = allIndividuals[index].transform.GetChild(0).GetComponent<ContainerTrggerUnderneath>();
-            if (newOne != null && newOne.ontheFloor != null)
-            {
-                score = allWeights[newOne.ontheFloor.row, newOne.ontheFloor.column];
-                score = score / maxWeight;
-                // 1 is the best
-            }
+
+            var newOne = allIndividuals[index].transform.position;
+            int row = (int)((newOne.z + currentMazeSpawner.ZfloatDistanceCellHeight / 2) / (currentMazeSpawner.ZfloatDistanceCellHeight)); // heaight
+
+            int colums = (int)((newOne.x + currentMazeSpawner.XfloatDistanceCellWidth / 2) / (currentMazeSpawner.XfloatDistanceCellWidth)); // widht
+
+            var mazeCell = currentMazeSpawner.wholeMaze[row, colums];
+
+            var path = graphToCalculate.GetShortestPath(mazeCell.myMonoCell.MyNode, currentMazeSpawner.endGoal.MyNode);
+            score = path.length;
+            score = (maxWeight - score) / maxWeight; // make minimization problem into maximisation!
+                                                     // 1 is the best
+
         }
         else
         {

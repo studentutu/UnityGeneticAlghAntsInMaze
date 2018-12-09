@@ -82,21 +82,30 @@ public class RecursiveMazeGenerator : BasicMazeGenerator
                     case Direction.Start:
                         break;
                     case Direction.Right:
+                        
                         VisitCell(row, column + 1, Direction.Right);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row, column +1) );
+                        GetMazeCell(row, column +1).neighbor.Add( GetMazeCell(row, column) );
+
                         break;
                     case Direction.Front:
                         VisitCell(row + 1, column, Direction.Front);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row+ 1, column) );
+                        GetMazeCell(row+ 1, column).neighbor.Add( GetMazeCell(row, column) );
+
 
                         break;
                     case Direction.Left:
                         VisitCell(row, column - 1, Direction.Left);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row, column -1) );
+                        GetMazeCell(row, column -1).neighbor.Add( GetMazeCell(row, column) );
+
                         break;
                     case Direction.Back:
                         VisitCell(row - 1, column, Direction.Back);
                         GetMazeCell(row, column).neighbor.Add( GetMazeCell(row -1, column) );
+                        GetMazeCell(row -1, column).neighbor.Add( GetMazeCell(row, column) );
+
 
                         break;
                 }
