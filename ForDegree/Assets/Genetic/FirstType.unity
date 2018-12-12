@@ -2302,7 +2302,7 @@ MonoBehaviour:
   TopNBestElementsKeep: 0
   target: {fileID: 0}
   numGenerationsText: {fileID: 1988816026}
-  waSecondsFor: 0.15
+  waSecondsFor: 0.16
   toTemporaralyDeactivate: {fileID: 1614970951}
   currentMazeSpawner: {fileID: 949568340}
   graphToCalculate: {fileID: 59490394}

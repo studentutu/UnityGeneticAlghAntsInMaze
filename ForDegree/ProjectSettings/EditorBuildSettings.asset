@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Genetic/ThirdType.unity
     guid: 0742bacac95240a489ac64664f3852a9
+  - enabled: 1
+    path: Assets/Genetic/Fourth.unity
+    guid: af6ea3f09ebf7224898e0e0c92e2a4a7
   m_configObjects: {}

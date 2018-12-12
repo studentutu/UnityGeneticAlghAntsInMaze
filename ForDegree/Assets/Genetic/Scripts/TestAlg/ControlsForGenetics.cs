@@ -17,7 +17,7 @@ public class ControlsForGenetics : MonoBehaviour
     [Header(" Control Interface")]
 
     [SerializeField] private Rigidbody playerToControl;
-    [SerializeField] private float ForceMagnitude = 2f;
+    [SerializeField] private float ForceMagnitude = 25f;
 
     [Header("Genetic")]
 

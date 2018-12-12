@@ -1747,7 +1747,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbd480039f60a344bdc0ff90b9d70b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Algorithm: 0
+  Algorithm: 1
   FullRandom: 0
   RandomSeed: 8
   Floor: {fileID: 165842, guid: 8d3b36f175a633f429d7bda54c76550d, type: 2}
@@ -2359,10 +2359,10 @@ MonoBehaviour:
   ForceMagnitude: 25
   populationSize: 200
   mutationRate: 0.01
-  TopNBestElementsKeep: 5
+  TopNBestElementsKeep: 0
   target: {fileID: 0}
   numGenerationsText: {fileID: 1988816026}
-  waSecondsFor: 0.15
+  waSecondsFor: 0.16
   toTemporaralyDeactivate: {fileID: 1614970951}
   currentMazeSpawner: {fileID: 949568340}
   graphToCalculate: {fileID: 59490394}

@@ -8,7 +8,8 @@ public enum AllScenes{
 	Monkeys = 1,
 	First = 2,
 	Second = 3,
-	Third = 4
+	Third = 4,
+	Fourth = 5
 }
 public class MenuChoser : MonoBehaviour {
 
@@ -27,5 +28,10 @@ public class MenuChoser : MonoBehaviour {
 	}
 	public void ChoseThird(){
 		SceneManager.LoadScene((int) AllScenes.Third);
+	}
+
+	public void ChoseFourth(){
+		SceneManager.LoadScene((int) AllScenes.Fourth);
+
 	}
 }
