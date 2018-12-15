@@ -46,7 +46,7 @@ public class ControlsForGenetics : MonoBehaviour
     private bool isitWithTheRightMaze = false;
     private float maxWeight = 0;
     #endregion
-    [SerializeField] private MazeSpawner currentMazeSpawner = null;
+    [SerializeField] public MazeSpawner currentMazeSpawner = null;
 
     [SerializeField] private Graph graphToCalculate;
     [SerializeField] private Transform parentToAllIndiv;
@@ -84,7 +84,7 @@ public class ControlsForGenetics : MonoBehaviour
             // if(runningCoroutine != null)
             //     StopCoroutine(runningCoroutine);
             yield return new WaitForSeconds(0.25f);
-            
+
             while (runningCoroutine != null)
             {
                 yield return null;
@@ -100,6 +100,12 @@ public class ControlsForGenetics : MonoBehaviour
         globalAlgor = null;
 
         toTemporaralyDeactivate.interactable = true;
+    }
+
+    public static ControlsForGenetics Instance;
+    public void Awake()
+    {
+        Instance = this;
     }
 
     // UI event

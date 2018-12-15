@@ -42,9 +42,15 @@ public class MazeSpawner : MonoBehaviour
     public MazeCell[,] wholeMaze;
     [HideInInspector]
     public NodeMono endGoal;
-    public float diff = 0 ;
+    public float diff = 0;
     [SerializeField] private Graph usedGraph;
-   
+
+    public static MazeSpawner Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private IEnumerator waitAbit(UnityEngine.UI.Button button)
     {
         yield return null;
@@ -73,13 +79,13 @@ public class MazeSpawner : MonoBehaviour
         allTargets.Add(target);
 
         var newOne = target.transform.position;
-        int row = (int) (newOne.z / ZfloatDistanceCellHeight); // heaight
-        int colums = (int) (newOne.x / XfloatDistanceCellWidth); // widht
+        int row = (int)(newOne.z / ZfloatDistanceCellHeight); // heaight
+        int colums = (int)(newOne.x / XfloatDistanceCellWidth); // widht
 
-        var mazeCell = wholeMaze[row,colums];
+        var mazeCell = wholeMaze[row, colums];
 
 
-        endGoal = mazeCell.myMonoCell; 
+        endGoal = mazeCell.myMonoCell;
         isReady = true;
     }
 
@@ -166,8 +172,8 @@ public class MazeSpawner : MonoBehaviour
                 }
             }
         }
-        float differenceBetween = Vector3.Distance( mMazeGenerator.GetMazeCell(0, 0).myMonoCell.transform.position, 
-                                                    mMazeGenerator.GetMazeCell(0, 1).myMonoCell.transform.position );
+        float differenceBetween = Vector3.Distance(mMazeGenerator.GetMazeCell(0, 0).myMonoCell.transform.position,
+                                                    mMazeGenerator.GetMazeCell(0, 1).myMonoCell.transform.position);
         diff = differenceBetween;
         usedGraph.nodes.Clear();
 
@@ -225,7 +231,7 @@ public class MazeSpawner : MonoBehaviour
     public float XfloatDistanceCellWidth = 0;
     public float ZfloatDistanceCellHeight = 0;
 
-    
+
     private void DestroyAllChildren()
     {
         if (gameObject.transform.childCount > 0)

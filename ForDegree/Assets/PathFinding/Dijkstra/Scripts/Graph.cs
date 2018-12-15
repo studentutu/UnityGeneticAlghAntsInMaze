@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// The Graph.
+/// The Dijkstra Graph.
 /// </summary>
 public class Graph : MonoBehaviour
 {
@@ -29,6 +29,11 @@ public class Graph : MonoBehaviour
         {
             return m_Nodes;
         }
+    }
+    public static Graph Instance;
+    public void Awake()
+    {
+        Instance = this;
     }
 
     /// <summary>
